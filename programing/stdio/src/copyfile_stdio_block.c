@@ -15,7 +15,7 @@ int main()
 	out = fopen("file.out","w");
 	char str[1024];
 //	int nread = 0;
-	fgets(str,strlen(str)+1,in);
+	fgets(str,strlen(str),in);
 	fprintf(out,"%s",str);
 	printf("程序运行成功");
 	return 0;
