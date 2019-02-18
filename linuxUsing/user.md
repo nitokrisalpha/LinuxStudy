@@ -107,4 +107,96 @@ CREATE_MAIL_SPOOL=yes
     SKEL=/etc/skel 用户主文件夹参考基准目录 这个就是指定用户主文件夹的参考记住目录
     CREATE_MAIL_SPOOL=yes 创建用户的mailbox
 
->UID GID 参考 /etc/login.defs
+>UID GID 参考 /etc/login.defs,建议还是自己去看看这个文件
+
+>passwd
+
+    使用useradd创建了账号之后，在默认的情况下，这个账号是被封锁了的，也就是说无法登陆这时候就需要使用passwd为用户设置密码
+
+    passwd [-luSnxwi] username (root 使用,普通用户只能passwd来改密码，没法设置其他的)
+    -l : 锁定密码
+    -u : 解锁密码
+    -S : 列出密码相关参数
+    -n : 密码不可修改天数
+    -x : 多久内必须改动密码
+    -w : 密码过期前的警告天数
+    -i : 密码失效日期
+    -e : 使账户密码失效，可用于第一次登陆系统时，强制让用户修改密码
+
+>usermod 用于对账户微调
+
+    有时候useradd之后，发现账户有些地方配置出错，这时候就可以使用usermod来微调账户
+    usermod [-cdegGlsuLU] username
+    -c : 后面接账户说明
+    -d : 后面接账户主文件夹
+    -e : 后面接日期(让账户失效 -1是让账户永不失效，0是让账户立即失效)
+    -f : 后面接天数
+    -g : 接初始用户组
+    -G : 后面接次要用户组
+    -a : 与-G合用可增加次要用户组的支持
+    -l : 后面接账户名称，用来修改账户名称
+    -s : 后面接Shell的实际文件
+    -u : 后面接UID数字
+    -L : 暂时将用户密码冻结(passwd -l 幻视)
+    -U : 将 /etc/shadow 密码列的!去掉(解锁密码，允许用户登陆)
+
+>userdel 删除用户账户
+
+    userdel [-r] username 删除用户， -r参数表示联通用户主文件夹一起删除
+
+## 用户功能
+
+    不论是 useradd,usermod,还是userdel，那都是系统管理员所能用的命令，普通用户也可以自定义一些数据
+
+>finger 可以用于查阅用户信息
+
+    finger [-sm] username
+    -s : 仅列出用户的账号，全名，终端机代号，登陆时间
+    -m : 列出与后面接的账号相同者
+    不过这个命令我测试的时候系统上面没有，需要手动安装，可能是觉着不怎么用了系统就没默认安装
+
+>chfn 修改信息
+
+    chfn [-foph] 账户名
+    -f : 完整名字
+    -o : 办公室房间号码
+    -p : 办公室电话号码
+    -h : 家里的电话号码
+
+>chsh 修改登陆系统后默认的shell
+
+    chsh [-ls]
+    -l : 列出目前系统上可用的shell，其实就是 /etc/shells 的内容
+    -s : 修改自己的shell
+
+>id 查询某人或自己的UID/GID等信息
+
+    id username
+    其他还有啥参数请使用man id 查看
+
+## 新增与删除用户组
+
+>groupadd
+
+    groupadd [-g gid] [-r] groupname
+    -g : 接某个特定的GID，用来直接给予某个GID
+    -r : 新建系统用户组。与 /etc/login.defs 内的GID_MIN有关
+
+>groupmod
+
+    groupmod [-g gid] [-n group_name] group_name
+    -g : 修改既有的GID数字
+    -n : 修改既有的组名
+
+>groupdel
+
+    groupdel [groupname]
+
+>gpasswd : 用户组管理员功能
+
+    gpasswd [-AMrR] groupname
+    无参数 : 给予groupname 一个密码
+    -A : 将groupname 的主控权交由后面的用户(改组组长)
+    -M : 将某些账号加入这个用户组中 (修改/etc/gshadow最后一个字段)
+    -r : 删除指定groupname的密码
+    -R : 让groupname的密码栏失效
