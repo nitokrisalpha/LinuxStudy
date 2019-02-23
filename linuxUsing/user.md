@@ -318,3 +318,72 @@ CREATE_MAIL_SPOOL=yes
     另外,我们想让某个具有 /sbin/nologin 的用户知道，他们不能登陆主机时，我们可以配置 /etc/nologin.txt 这个文件，在这里面说明为什么不能登陆
 
 * PAM模块简介
+
+    为了统一用户的身份信息验证Linux 开发出了PAM，PAM可以说是一套应用程序编程接口，它提供了一连串的验证机制，只要用户将验证阶段的需求告知PAM后，PAM就能够回报用户验证的结果，还可以提供给其他程序使用，不论什么程序都可以使用PAM来验证。
+
+* 程序调用PAM的流程
+
+    以passwd为例：
+
+        1.用户开始执行 /usr/bin/passwd 并输入密码
+        2.passwd调用PAM模块进行验证
+        3.PAM模块会到 /etc/pam.d/ 中找寻与程序同名的配置文件
+        4.依据 /etc/pam.d/passwd 内的配置，引用相关的PAM模块逐步进行验证分析
+        5.将验证结果回传给passwd
+        6.passwd根据 PAM回传结果决定下一步操作
+
+* PAM模块的设置
+
+    从上面的流程可知，PAM模块的配置就是到 /etc/pam.d/ 中创建一个和程序同名的配置文件，这个配置文件大概长下面这样
+
+```c
+1    #%PAM-1.0
+2    auth       include	system-auth
+3    account    include	system-auth
+4    password   substack	system-auth
+5    -password   optional	pam_gnome_keyring.so use_authtok
+6    password   substack	postlogin
+```
+
+    第一行是PAM版本的说明，剩下的每一行都是一个验证的过程，字段从左到右的意义是：
+    验证类型    控制标准    PAM模块与该模块的参数
+    配置文件中，除了第一行声明PAM版本之外，其他的任何以 '#' 开头的都是批注
+
+* 第一个字段，验证类型
+
+    验证类型主要分为四种，说明如下
+
+    auth：是 authentication的简写，主要是用来检验用户的身份验证，这种类型通常是需要密码来检验的，所以后续接的模块是用来检验用户的身份
+
+    account：account大部分用来授权，检验用户是否具有正确的权限
+
+    session：管理的是用在这次登陆期间pam所给予的环境设置
+
+    password：，密码，主要用于提供验证的修订的工作
+
+* 第二个字段，验证的控制标志
+
+    验证的控制标志就是验证的标准，主要也是四种方式
+
+    required：此验证若成功，则带有success的标志，若失败则带有failure的标志，但无论成功都会继续后续的验证流程
+
+    requisite：若验证失败则立刻回报原程序failure的标志，并终止后续的验证流程
+
+    sufficient：若验证成功则立刻回传success给原程序，并终止后续的验证流程
+
+    optional：这个模块控件大多是在显示信息，不用在验证方面
+
+* pam模块目录
+
+    /etc/pam.d/*：每个程序个别的PAM配置文件
+
+    /lib/security/*：模块实际存放位置
+
+    /etc/security/*：其他pam环境的配置文件
+
+    /usr/share/doc/pam-*/：详细的pam说明文件
+
+* pam 常用模块
+
+    看书上
+
