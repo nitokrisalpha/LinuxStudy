@@ -89,7 +89,7 @@ sys:x:3:
     useradd [-u UID] [-g 初始用户组] [-G 次要用户组] [-m 强制创建主文件夹] [-d 指定主文件夹] username
     useradd 参考的文件: /etc/default/useradd 以测试机为例
 
-```C
+```shell
 GROUP=100
 HOME=/home
 INACTIVE=-1
@@ -277,7 +277,7 @@ CREATE_MAIL_SPOOL=yes
 
 * 计入我们想让某个账号可以使用root的任何命令,那么可以像下面这么修改
 
-```c
+```shell
     //从左到右是:用户账号 登陆者的来源主机名=(可切换的身份) 可执行的命令
     root ALL=(ALL)          ALL
     username ALL=(ALL)      ALL
@@ -299,13 +299,13 @@ CREATE_MAIL_SPOOL=yes
 
     当以系统中由很多个用户，和多个用户组，我们想让某个用户组的用户可以管理系统改怎么做呢?
 
-```c
+```shell
 // /etc/sudoers 文件里有下面这一行(wheel前的 % 表示这是一个用户组)
 // 这句话的意思是 wheel用户组里面的用户可以使用sudo 命令，那么我们只需要把用户添加进wheel就行了嘛
     %wheel ALL=(ALL) ALL
 ```
 
-```c
+```shell
     usermod -a -G wheel username
 ```
 
@@ -336,7 +336,7 @@ CREATE_MAIL_SPOOL=yes
 
     从上面的流程可知，PAM模块的配置就是到 /etc/pam.d/ 中创建一个和程序同名的配置文件，这个配置文件大概长下面这样
 
-```c
+```shell
 1    #%PAM-1.0
 2    auth       include	system-auth
 3    account    include	system-auth
@@ -387,3 +387,35 @@ CREATE_MAIL_SPOOL=yes
 
     看书上
 
+## *主机上用户信息传递
+
+## *手动添加用户
+
+    ***前略，请看书***
+
+> 批量新建账号模板
+
+    由于现在的发新版的passwd已经提供了 --stdin 的功能，因此我们可以提供账号密码的话那么就可以简单的新建账号，下面是一个批量新建账号的脚本
+
+``` shell
+  1 #!/bin/bash
+  2 # file name : account.sh
+  3 # 功能：检查账户文件是否存在，并将该文件内的账号取出
+  4 #       新建上述文件的账号
+  5 #       将上述账号的密码修改成为强制第一次进入需要修改密码的格式
+  6 #       2018-2-23
+  7 export PATH=/bin:/sbin:/uer/bin:/usr/sbin
+  8 #       检查文件存在
+  9         if [ ! -f account.txt ];then
+ 10                 echo "所需账号文件不存在"
+ 11                 exit 1
+ 12         fi
+ 13         usernames=$(cat account.txt)
+ #创建账号
+ 14         for username in $usernames
+ 15         do
+ 16         useradd $username
+ 17         echo $username | passwd --stdin $username
+ 18         chage -d 0 $username
+ 19         done
+```
