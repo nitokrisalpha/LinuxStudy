@@ -46,7 +46,7 @@
     fputc函数把一个字符写道一个输出文件流中，它返回写入的值，如果失败则返回EOF
 
 ## fgets 和 gets函数
-    
+
     函数原型
     char *fgets(char *s,int n,FILE *stream)
     char *fgets(char *s)
